@@ -1,5 +1,6 @@
 import './App.css';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import Modal from './Modal';
 import Cell from './Cell';
 import p1 from './images/pattern_1.png';
 import p2 from './images/pattern_2.png';
@@ -11,6 +12,13 @@ type CellType = {
   id: number;
   isOn: boolean;
 };
+
+function lastRow() {
+  return cellsPerColumn - 2;
+}
+function lastColumn() {
+  return cellsPerRow - 2;
+}
 
 export function getIndex(i: number, j: number, cells: number = cellsPerRow): number {
   return i * cells + j;
@@ -152,10 +160,16 @@ function App() {
   const [presetRow, setPresetRow] = useState<number>(1);
   const [presetColumn, setPresetColumn] = useState<number>(1);
   const [generationTime, setGenerationTime] = useState<number>(100);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [cells, setCells] = useState<CellType[]>(new Array(cellsPerRow * cellsPerColumn).fill(null).map(() => ({
     id: Math.random(),
     isOn: false,
   })));
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      setErrorMessage('Window resizes are not supported, because they change the grid in unexpected ways. Please reload the page after a window resize.');
+    });
+  }, []);
   const [intervalState, setIntervalState] = useState<number>();
   function checkIfElementIsOn(index: number, isOn: boolean): void {
     if (isOn) {
@@ -251,10 +265,27 @@ function App() {
       return res;
     });
   }
+  function showDoesNotFit() {
+    setErrorMessage('The selected preset does not fit the place that was specified. Please select a smaller preset or specify a different place.');
+  }
   function placePreset() {
     if ('p1' === presetOption) {
+      const p1Width = 13;
+      const p1Height = 13;
+      const fits = presetRow + p1Height <= lastRow() + 1
+        && presetColumn + p1Width <= lastColumn() + 1;
+      if (!fits) {
+        return showDoesNotFit();
+      }
       setCells(prevCells => placeP1(prevCells, presetRow, presetColumn));
     } else if ('p2' === presetOption) {
+      const p2Width = 3;
+      const p2Height = 10;
+      const fits = presetRow + p2Height <= lastRow() + 1
+        && presetColumn + p2Width <= lastColumn() + 1;
+      if (!fits) {
+        return showDoesNotFit();
+      }
       setCells(prevCells => placeP2(prevCells, presetRow, presetColumn));
     }
     setCells(prevCells => prevCells.map((cell, i) => {
@@ -262,18 +293,50 @@ function App() {
       return cell;
     }));
   }
+  function setRow(row: string) {
+    const value = parseInt(row);
+    if (value < 1) {
+      setPresetRow(1);
+      return;
+    }
+    if (value > cellsPerColumn) {
+      setPresetRow(lastRow());
+      return;
+    }
+    setPresetRow(value);
+  }
+  function setColumn(column: string) {
+    const value = parseInt(column);
+    if (value < 1) {
+      setPresetColumn(1);
+      return;
+    }
+    if (value > cellsPerRow) {
+      setPresetColumn(lastColumn());
+      return;
+    }
+    setPresetColumn(value)
+  }
   return (
     <div className='app'>
+      <Modal
+        isOpen={errorMessage !== ''}
+        closeModal={() => setErrorMessage('')}
+        heading='Warning!'
+        description={errorMessage}
+        button='Ok'
+      />
+
       <div className='aside'>
         {intervalState && <strong style={{ color: 'lightgreen' }}>Running...</strong>}
         {!intervalState && <strong style={{ color: 'lightgreen' }}>Paused</strong>}
         <div className='controls'>
           {/** Play button */}
-          <svg onClick={start} fill='lightgreen' xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+          <svg onClick={start} style={{ display: intervalState ? 'none' : 'block' }} fill='lightgreen' xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
             <path d="M0 0h24v24H0z" fill="none"/><path d="M8 5v14l11-7z"/>
           </svg>
           {/** Pause button */}
-          <svg onClick={pause} fill='lightgreen' xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+          <svg onClick={pause} style={{ display: intervalState ? 'block' : 'none' }} fill='lightgreen' xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
             <path d="M0 0h24v24H0z" fill="none"/><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
           </svg>
           {/** Delete button */}
@@ -299,27 +362,21 @@ function App() {
             <label htmlFor='column' style={{ color: 'lightgreen' }}>Column</label>
           </div>
           <div className='coordinates'>
-            <input id='row' type='number' value={presetRow} onChange={e => setPresetRow(parseInt(e.target.value))}></input>
-            <input id='column' type='number' value={presetColumn} onChange={e => setPresetColumn(parseInt(e.target.value))}></input>
+            <input id='row' type='number' value={presetRow} onChange={e => setRow(e.target.value)}></input>
+            <input id='column' type='number' value={presetColumn} onChange={e => setColumn(e.target.value)}></input>
           </div>
         </div>
 
         <div style={{ marginTop: 20 }}>
           <div className='coordinates-row'>
-            <input type='radio'
-              value='p1'
-              checked={presetOption === 'p1'}
-              onChange={(e) => setPresetOption(e.target.value)}
-              ></input>
-            <img src={p1} className='preset-img' ></img>
+            <img src={p1}
+              className={ presetOption === 'p1' ? 'preset-img chosen-preset' : 'preset-img'}
+              onClick={() => setPresetOption('p1')} ></img>
           </div>
           <div className='coordinates-row'>
-            <input type='radio'
-              value='p2'
-              checked={presetOption === 'p2'}
-              onChange={(e) => setPresetOption(e.target.value)}
-              ></input>
-            <img src={p2} className='preset-img' ></img>
+            <img src={p2}
+              className={ presetOption === 'p2' ? 'preset-img chosen-preset' : 'preset-img'}
+              onClick={() => setPresetOption('p2')} ></img>
           </div>
           <button id='preset-btn' onClick={placePreset}>Place preset!</button>
         </div>
