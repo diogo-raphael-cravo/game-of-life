@@ -4,6 +4,7 @@ import Modal from './Modal';
 import Cell from './Cell';
 import p1 from './images/pattern_1.png';
 import p2 from './images/pattern_2.png';
+import p3 from './images/pattern_3.png';
 
 const cellWidth = 10;
 const cellsPerRow = Math.floor((window.innerWidth - 250) / cellWidth) + 2;
@@ -137,6 +138,56 @@ function placeP2(cells: CellType[], i: number, j: number): CellType[] {
   cells[getIndex(i + 9, j + 1)].isOn = true;
   return newCells;
 }
+
+function placeP3(cells: CellType[], i: number, j: number): CellType[] {
+  const newCells = [...cells];
+  cells[getIndex(i, j + 24)].isOn = true;
+
+  cells[getIndex(i + 1, j + 22)].isOn = true;
+  cells[getIndex(i + 1, j + 24)].isOn = true;
+
+  cells[getIndex(i + 2, j + 12)].isOn = true;
+  cells[getIndex(i + 2, j + 13)].isOn = true;
+  cells[getIndex(i + 2, j + 20)].isOn = true;
+  cells[getIndex(i + 2, j + 21)].isOn = true;
+  cells[getIndex(i + 2, j + 34)].isOn = true;
+  cells[getIndex(i + 2, j + 35)].isOn = true;
+
+  cells[getIndex(i + 3, j + 11)].isOn = true;
+  cells[getIndex(i + 3, j + 15)].isOn = true;
+  cells[getIndex(i + 3, j + 20)].isOn = true;
+  cells[getIndex(i + 3, j + 21)].isOn = true;
+  cells[getIndex(i + 3, j + 34)].isOn = true;
+  cells[getIndex(i + 3, j + 35)].isOn = true;
+
+  cells[getIndex(i + 4, j)].isOn = true;
+  cells[getIndex(i + 4, j + 1)].isOn = true;
+  cells[getIndex(i + 4, j + 10)].isOn = true;
+  cells[getIndex(i + 4, j + 16)].isOn = true;
+  cells[getIndex(i + 4, j + 20)].isOn = true;
+  cells[getIndex(i + 4, j + 21)].isOn = true;
+
+  cells[getIndex(i + 5, j)].isOn = true;
+  cells[getIndex(i + 5, j + 1)].isOn = true;
+  cells[getIndex(i + 5, j + 10)].isOn = true;
+  cells[getIndex(i + 5, j + 14)].isOn = true;
+  cells[getIndex(i + 5, j + 16)].isOn = true;
+  cells[getIndex(i + 5, j + 17)].isOn = true;
+  cells[getIndex(i + 5, j + 22)].isOn = true;
+  cells[getIndex(i + 5, j + 24)].isOn = true;
+
+  cells[getIndex(i + 6, j + 10)].isOn = true;
+  cells[getIndex(i + 6, j + 16)].isOn = true;
+  cells[getIndex(i + 6, j + 24)].isOn = true;
+
+  cells[getIndex(i + 7, j + 11)].isOn = true;
+  cells[getIndex(i + 7, j + 15)].isOn = true;
+
+  cells[getIndex(i + 8, j + 12)].isOn = true;
+  cells[getIndex(i + 8, j + 13)].isOn = true;
+  return newCells;
+}
+
 function getNeighboors(cells: CellType[], i: number, j: number): CellType[] {
   return getNeighboorIndexes(i, j).map(x => cells[x]);
 }
@@ -287,6 +338,15 @@ function App() {
         return showDoesNotFit();
       }
       setCells(prevCells => placeP2(prevCells, presetRow, presetColumn));
+    } else if ('p3' === presetOption) {
+      const p3Width = 36;
+      const p3Height = 9;
+      const fits = presetRow + p3Height <= lastRow() + 1
+        && presetColumn + p3Width <= lastColumn() + 1;
+      if (!fits) {
+        return showDoesNotFit();
+      }
+      setCells(prevCells => placeP3(prevCells, presetRow, presetColumn));
     }
     setCells(prevCells => prevCells.map((cell, i) => {
       checkIfElementIsOn(i, cell.isOn);
@@ -377,6 +437,11 @@ function App() {
             <img src={p2}
               className={ presetOption === 'p2' ? 'preset-img chosen-preset' : 'preset-img'}
               onClick={() => setPresetOption('p2')} ></img>
+          </div>
+          <div className='coordinates-row'>
+            <img src={p3}
+              className={ presetOption === 'p3' ? 'preset-img chosen-preset' : 'preset-img'}
+              onClick={() => setPresetOption('p3')} ></img>
           </div>
           <button id='preset-btn' onClick={placePreset}>Place preset!</button>
         </div>
