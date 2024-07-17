@@ -1,0 +1,84 @@
+.app {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cell {
+  box-sizing: border-box;
+  border: 1px solid #d6d6d6;
+  width: 10px;
+  height: 10px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.aside {
+  margin-top: 20px;
+  flex: 1 0 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.controls svg {
+  width: 30px;
+  cursor: pointer;
+}
+
+.input {
+  background-color: #4e5565;
+  padding: 10px;
+  color: lightgreen;
+}
+
+.input::placeholder {
+  color: #89ad8c;
+}
+
+.coordinates-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-items: stretch;
+}
+
+.coordinates {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+}
+
+.coordinates-row .coordinates:first-child {
+  margin-right: 10px;
+}
+
+.coordinates input {
+  width: 40px;
+  background-color: #4e5565;
+  padding: 10px;
+  color: lightgreen;
+}
+
+.preset-img {
+  width: 100px;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+#preset-btn {
+  padding: 10px;
+  background-color: #4e5565;
+  color: lightgreen;
+  margin-top: 20px;
+}
